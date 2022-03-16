@@ -202,30 +202,49 @@ interface FastEthernet0/1
 Конфиг R1:
 ```
 !
-
+interface GigabitEthernet0/0/0
+ no ip address
+ duplex auto
+ speed auto
+ shutdown
+!
+interface GigabitEthernet0/0/1
+ no ip address
+ duplex auto
+ speed auto
+!
 interface GigabitEthernet0/0/1.3
-
-` `encapsulation dot1Q 3
-
-` `ip address 192.168.3.1 255.255.255.0
-
+ encapsulation dot1Q 3
+ ip address 192.168.3.1 255.255.255.0
 !
-
 interface GigabitEthernet0/0/1.4
-
-` `encapsulation dot1Q 4
-
-` `ip address 192.168.4.1 255.255.255.0
-
+ encapsulation dot1Q 4
+ ip address 192.168.4.1 255.255.255.0
 !
-
 interface GigabitEthernet0/0/1.8
-
-` `no ip address
-
+ no ip address
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+ip classless
+!
+ip flow-export version 9
 !
 ```
 Проверяем командой “show ip interface brief”
+
+
+```
+Interface              IP-Address      OK? Method Status                Protocol 
+GigabitEthernet0/0/0   unassigned      YES NVRAM  administratively down down 
+GigabitEthernet0/0/1   unassigned      YES NVRAM  up                    up 
+GigabitEthernet0/0/1.3 192.168.3.1     YES manual up                    up 
+GigabitEthernet0/0/1.4 192.168.4.1     YES manual up                    up 
+GigabitEthernet0/0/1.8 unassigned      YES unset  up                    up 
+Vlan1                  unassigned      YES unset  administratively down down
+```
 
 **5. Проверка работы маршрутизации между VLAN**
 
@@ -237,4 +256,4 @@ interface GigabitEthernet0/0/1.8
 
 Итоговая схема подключения:
 <br>
-![Shema](https://github.com/Farix01/Otus-kurs/blob/main/Лаборатории/Vlan/Shema.jpg)
+![Schema](https://https://github.com/Farix01/Otus-kurs/blob/main/%D0%9B%D0%B0%D0%B1%D0%BE%D1%80%D0%B0%D1%82%D0%BE%D1%80%D0%B8%D0%B8/Vlan/Schema.jpg)
