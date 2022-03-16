@@ -12,7 +12,7 @@
 **1. Построение сети и настройка основных параметров на устройствах**
 
 Подключаем устройства, как показано на схеме топологии.
-![Topology](https://github.com/Farix01/Otus-kurs/blob/main/Лаборатории/Vlan/topologgy.jpg)
+![Topologiya](https://github.com/Farix01/Otus-kurs/blob/main/%D0%9B%D0%B0%D0%B1%D0%BE%D1%80%D0%B0%D1%82%D0%BE%D1%80%D0%B8%D0%B8/Vlan/Topologiya.png)
 
 Настроим основные параметры для маршрутизатора:
 
