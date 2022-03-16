@@ -129,61 +129,42 @@ PC-B    NIC 192.168.4.3 255.255.255.0   192.168.4.1
 
 Конфиг S2:
 ```
+interface FastEthernet0/23
+ switchport access vlan 7
+ switchport mode access
+ shutdown
 !
-
 interface FastEthernet0/24
-
-` `switchport access vlan 7
-
-` `switchport mode trunk
-
-` `shutdown
-
+ switchport access vlan 7
+ switchport mode access
+ shutdown
 !
-
 interface GigabitEthernet0/1
-
-` `switchport access vlan 7
-
-` `switchport mode trunk
-
-` `shutdown
-
+ switchport access vlan 7
+ switchport mode access
+ shutdown
 !
-
 interface GigabitEthernet0/2
-
-` `switchport access vlan 7
-
-` `switchport mode trunk
-
-` `shutdown
-
+ switchport access vlan 7
+ switchport mode access
+ shutdown
 !
-
 interface Vlan1
-
-` `no ip address
-
-` `shutdown
-
+ no ip address
+ shutdown
 !
-
 interface Vlan3
-
-` `ip address 192.168.3.12 255.255.255.0
-
+ ip address 192.168.3.12 255.255.255.0
 !
-
 interface Vlan4
-
-` `no ip address
-
+ no ip address
+!
+interface Vlan7
+ no ip address
+!
+banner motd "Attention!!! Unauthorized access is prohibited!!!"
 !
 
-interface Vlan7
-
-` `no ip address
 ```
 **3. Настройка магистрали 802.1Q между коммутаторами**
 
