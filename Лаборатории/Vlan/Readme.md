@@ -222,6 +222,7 @@ interface GigabitEthernet0/0/1.4
  ip address 192.168.4.1 255.255.255.0
 !
 interface GigabitEthernet0/0/1.8
+ encapsulation dot1Q 8 native
  no ip address
 !
 interface Vlan1
