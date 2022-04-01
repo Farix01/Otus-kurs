@@ -5,8 +5,11 @@
 ***Задание***
 
 Часть 1. Создание сети и настройка основных параметров устройства
+
 Часть 2. Выбор корневого моста
+
 Часть 3. Наблюдение за процессом выбора протоколом STP порта, исходя из стоимости портов
+
 Часть 4. Наблюдение за процессом выбора протоколом STP порта, исходя из приоритета портов
 
 # Часть 1
@@ -158,3 +161,77 @@ VLAN0001 Root FWD 19
 Порт F0/2 на S3 назначен в качестве альтернативного и заблокирован для предотвращения петли, т.к. его BID больше за счёт большего мак-адреса.
 
 # Часть 3
+
+***Определим коммутатор с заблокированным портом***
+```
+S3#show span
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    32769
+             Address     0010.116E.7750
+             Cost        19
+             Port        4(FastEthernet0/4)
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     00E0.B0C1.4E4D
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  20
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------------------------------
+Fa0/2            Altn BLK 19        128.2    P2p
+Fa0/4            Root FWD 19        128.4    P2p
+```
+***Настроим приоритетность порта***
+На коммутаторе S3 уменьшаем приоритет активного порта.
+Команда:
+```
+S3(config)# interface f0/4
+S3(config-if)# spanning-tree cost 18
+```
+После чего видим такие значения:
+
+```
+S3#show span
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    32769
+             Address     0010.116E.7750
+             Cost        19
+             Port        4(FastEthernet0/4)
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     00E0.B0C1.4E4D
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  20
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------------------------------
+Fa0/2            Desg FWD 19        128.2    P2p
+Fa0/4            Root FWD 19        128.4    P2p
+```
+***Заблокированный порт на S3 стал назначенным, так как его стоимость стала ниже*** 
+```
+S2#show span
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    32769
+             Address     0010.116E.7750
+             Cost        19
+             Port        2(FastEthernet0/2)
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     0090.21EE.D503
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  20
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------------------------------
+Fa0/4            Desg FWD 19        128.4    P2p
+Fa0/2            Root BLK 19        128.2    P2p
+
+```
+***На коммутаторе S2 заблокировался порт fa0/2, так как его стоимость осталась 19, и эта самая большая стоимость до root.***
