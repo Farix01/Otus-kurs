@@ -1,0 +1,98 @@
+!
+version 15.4
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+service password-encryption
+!
+hostname R2
+!
+!
+!
+enable secret 5 $1$mERr$hx5rVt7rPNoS4wqbXKX7m0
+enable password 7 0822404F1A0A
+!
+!
+!
+!
+!
+!
+ip cef
+no ipv6 cef
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+no ip domain-lookup
+!
+!
+spanning-tree mode pvst
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0/0
+ ip address 10.0.0.2 255.255.255.252
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/0/1
+ ip address 192.168.1.97 255.255.255.240
+ ip helper-address 10.0.0.1
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/0/1.100
+ no ip address
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+ip classless
+ip route 0.0.0.0 0.0.0.0 10.0.0.1 
+!
+ip flow-export version 9
+!
+!
+!
+banner motd "Attention!!! Unauthorized access is prohibited"
+!
+!
+!
+!
+!
+line con 0
+ exec-timeout 0 0
+ password 7 0822455D0A16
+ logging synchronous
+ login
+!
+line aux 0
+ exec-timeout 0 0
+ password 7 0822455D0A16
+ logging synchronous
+ login
+!
+line vty 0 4
+ exec-timeout 0 0
+ password 7 0822455D0A16
+ logging synchronous
+ login
+line vty 5 15
+ exec-timeout 0 0
+ password 7 0822455D0A16
+ logging synchronous
+ login
+!
+!
+!
+end
+
