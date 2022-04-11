@@ -184,12 +184,6 @@ line vty 5 15
 **Создадим Vlan и назначим правильным интерфейсам на S1**
 ```
 !
-!
-interface FastEthernet0/5
- switchport trunk native vlan 1000
- switchport trunk allowed vlan 100,200,1000
- switchport mode trunk
-!
 interface FastEthernet0/1
  switchport access vlan 999
  switchport mode access
@@ -236,6 +230,20 @@ interface Vlan1
 ip default-gateway 192.168.1.97
 !
 ```
+**Настроим интерфейс F0/5 на S1 в качестве магистрали**
+```
+!
+interface FastEthernet0/5
+ switchport trunk native vlan 1000
+ switchport trunk allowed vlan 100,200,1000
+ switchport mode trunk
+!
+```
+**Ответ на вопрос**
+
+На этом этапе какой IP-адрес будет иметь ПК, если они будут подключены к сети с помощью DHCP?
+На данном этапе компьютеры будут получать адреса из диапазона 169.254.0.0/16
+
 # Часть 2
 **Настроим и проверим два DHCP сервера на R1**
 ```
@@ -252,4 +260,92 @@ network 192.168.1.96 255.255.255.240
 default-router 192.168.1.97
 domain-name ccna-lab.com
 lease 7 12 30
+```
+**Проверка конфигурации**
+```
+Pool R1_Client :
+ Utilization mark (high/low)    : 100 / 0
+ Subnet size (first/next)       : 0 / 0 
+ Total addresses                : 62
+ Leased addresses               : 1
+ Excluded addresses             : 2
+ Pending event                  : none
+
+ 1 subnet is currently in the pool
+ Current index        IP address range                    Leased/Excluded/Total
+ 192.168.1.1          192.168.1.1      - 192.168.1.62      1    / 2     / 62
+
+Pool R2_Client_Lan :
+ Utilization mark (high/low)    : 100 / 0
+ Subnet size (first/next)       : 0 / 0 
+ Total addresses                : 14
+ Leased addresses               : 1
+ Excluded addresses             : 2
+ Pending event                  : none
+
+ 1 subnet is currently in the pool
+ Current index        IP address range                    Leased/Excluded/Total
+ 192.168.1.97         192.168.1.97     - 192.168.1.110     1    / 2     / 14
+```
+
+```
+R1#show ip dhcp binding 
+IP address       Client-ID/              Lease expiration        Type
+                 Hardware address
+192.168.1.6      0005.5EA0.E250           --                     Automatic
+192.168.1.102    00D0.581B.E144           --                     Automatic
+```
+**Проверяем ping с PC-A**
+```
+C:\>ping 10.0.0.1
+
+Pinging 10.0.0.1 with 32 bytes of data:
+
+Reply from 10.0.0.1: bytes=32 time=1ms TTL=255
+Reply from 10.0.0.1: bytes=32 time<1ms TTL=255
+Reply from 10.0.0.1: bytes=32 time<1ms TTL=255
+Reply from 10.0.0.1: bytes=32 time<1ms TTL=255
+
+Ping statistics for 10.0.0.1:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 1ms, Average = 0ms
+
+```
+
+# Часть 3
+**Настроим DHCP relay на R2**
+
+```
+interface GigabitEthernet0/0/1
+ ip address 192.168.1.97 255.255.255.240
+ ip helper-address 10.0.0.1
+ duplex auto
+ speed auto
+```
+**Проверка выдачи адреса на PC-B**
+```
+C:\>ipconfig /renew
+
+   IP Address......................: 192.168.1.102
+   Subnet Mask.....................: 255.255.255.240
+   Default Gateway.................: 192.168.1.97
+   DNS Server......................: 0.0.0.0
+
+```
+**Ping R1 с PC-B**
+```
+C:\>ping 10.0.0.1
+
+Pinging 10.0.0.1 with 32 bytes of data:
+
+Reply from 10.0.0.1: bytes=32 time<1ms TTL=254
+Reply from 10.0.0.1: bytes=32 time<1ms TTL=254
+Reply from 10.0.0.1: bytes=32 time<1ms TTL=254
+Reply from 10.0.0.1: bytes=32 time<1ms TTL=254
+
+Ping statistics for 10.0.0.1:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
 ```
