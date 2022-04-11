@@ -88,4 +88,168 @@ line vty 5 15
  !
  clock set 12:00:00 11 APRIL 2022
 ```
+**Настройка маршрутизации на R1**
+```
+interface GigabitEthernet0/0/0
+ ip address 10.0.0.1 255.255.255.252
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/0/1
+ no ip address
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/0/1.100
+ description Clients
+ encapsulation dot1Q 100
+ ip address 192.168.1.1 255.255.255.192
+!
+interface GigabitEthernet0/0/1.200
+ description Management
+ encapsulation dot1Q 200
+ ip address 192.168.1.65 255.255.255.224
+!
+interface GigabitEthernet0/0/1.1000
+ description Native
+ encapsulation dot1Q 1000 native
+ no ip address
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+ip classless
+ip route 0.0.0.0 0.0.0.0 10.0.0.2 
+```
+**Настройка g0/0/1 на R2, затем G0/0/0 и статической маршрутизации**
+```
+interface GigabitEthernet0/0/0
+ ip address 10.0.0.2 255.255.255.252
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/0/1
+ ip address 192.168.1.97 255.255.255.240
+ duplex auto
+ speed auto
+!
+ip classless
+ip route 0.0.0.0 0.0.0.0 10.0.0.1 
+!
+```
+**Проверяем статический маршрут между R1 и R2**
+```
+R1#ping 10.0.0.2
 
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.0.0.2, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 0/0/0 ms
+```
+**Настроим основные параметры для каждого коммутатора**
+```
+hostname S1,S2
+!
+enable secret 5 $1$mERr$hx5rVt7rPNoS4wqbXKX7m0
+enable password 7 0822404F1A0A
+!
+!
+!
+no ip domain-lookup
+!
+banner motd "Attention!!! Access is denied!!!"
+!
+!
+!
+line con 0
+ password 7 0822455D0A16
+ logging synchronous
+ login
+ exec-timeout 0 0
+!
+line vty 0 4
+ exec-timeout 0 0
+ password 7 0822455D0A16
+ logging synchronous
+ login
+line vty 5 15
+ exec-timeout 0 0
+ password 7 0822455D0A16
+ logging synchronous
+ login
+ !
+ clock set 12:00:00 11 APRIL 2022
+```
+**Создадим Vlan и назначим правильным интерфейсам на S1**
+```
+!
+!
+interface FastEthernet0/5
+ switchport trunk native vlan 1000
+ switchport trunk allowed vlan 100,200,1000
+ switchport mode trunk
+!
+interface FastEthernet0/1
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+!
+interface FastEthernet0/6
+ switchport access vlan 100
+ switchport mode access
+!
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+interface Vlan200
+ ip address 192.168.1.66 255.255.255.224
+!
+interface Vlan999
+ no ip address
+!
+interface Vlan1000
+ no ip address
+!
+ip default-gateway 192.168.1.65
+!
+S1#show vlan
+1    default                          active    
+100  Clients                          active    Fa0/6
+200  Managemetr                       active    
+999  Parking_Lot                      active    Fa0/1, Fa0/2, Fa0/3, Fa0/4
+                                                Fa0/7, Fa0/8, Fa0/9, Fa0/10
+                                                Fa0/11, Fa0/12, Fa0/13, Fa0/14
+                                                Fa0/15, Fa0/16, Fa0/17, Fa0/18
+                                                Fa0/19, Fa0/20, Fa0/21, Fa0/22
+                                                Fa0/23, Fa0/24, Gig0/1, Gig0/2
+```
+**Создадим Vlan и шлюз по умолчанию на S2**
+```
+!
+interface Vlan1
+ ip address 192.168.1.98 255.255.255.240
+!
+ip default-gateway 192.168.1.97
+!
+```
+# Часть 2
+**Настроим и проверим два DHCP сервера на R1**
+```
+ip dhcp excluded-address 192.168.1.1 192.168.1.5
+ip dhcp pool R1_Client
+network 192.168.1.0 255.255.255.192
+default-router 192.168.1.97 192.168.1.101
+domain-name ccna-lab.com
+lease 7 12 30
+exit
+ip dhcp excluded-address 192.168.1.97
+ip dhcp pool R2_Client_LAN 
+network 192.168.1.96 255.255.255.240
+default-router 192.168.1.97
+domain-name ccna-lab.com
+lease 7 12 30
+```
